@@ -37,7 +37,13 @@ output/
 # ---------- 3. IDE / 编辑器 ----------
 # VS 的 .vs/ 里是 100 MB 级别的 IntelliSense 数据库，绝对不能入库
 .vs/
-.vscode/
+# VS Code：仓库只保留通用的工程配置（新人拉下来即可 F5 运行），
+# 其余本机状态文件（workspaceStorage、历史、插件缓存）一律忽略
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
 .idea/
 *.sln
 *.slnx

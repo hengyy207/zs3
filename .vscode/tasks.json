@@ -1,0 +1,46 @@
+{
+  // Ctrl+Shift+B 直接跑默认任务「构建 myplace」，等价于命令行的 cmake --build build
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "配置 CMake（首次、或改过 CMakeLists.txt 后）",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["-S", ".", "-B", "build", "-G", "Ninja"],
+      "problemMatcher": []
+    },
+    {
+      "label": "构建 myplace",
+      "type": "shell",
+      "command": "cmake",
+      "args": ["--build", "build"],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "运行 --fast（默认 adaptec1）",
+      "type": "shell",
+      "command": "${workspaceFolder}/build/myplace",
+      "args": ["--fast"],
+      "dependsOn": "构建 myplace",
+      "problemMatcher": []
+    },
+    {
+      "label": "运行 thin1（秒级验证）",
+      "type": "shell",
+      "command": "${workspaceFolder}/build/myplace",
+      "args": ["--fast", "data/thin1.aux"],
+      "dependsOn": "构建 myplace",
+      "problemMatcher": []
+    },
+    {
+      "label": "启动 Web 前端（Ctrl+C 停止）",
+      "type": "shell",
+      "command": "python3",
+      "args": ["server.py"],
+      "options": { "cwd": "${workspaceFolder}/web" },
+      "isBackground": true,
+      "problemMatcher": []
+    }
+  ]
+}

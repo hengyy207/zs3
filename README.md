@@ -8,14 +8,14 @@
 
 ## 一、功能一览
 
-| 阶段 | 内容 | 代码位置 |
-| --- | --- | --- |
-| 任务 3 | 解析 BookShelf 六件套（`.aux .scl .nodes .nets .pl .wts`），建立 Module / Pin / Net / SiteRow 数据结构并统计 | `MyPlace/myplace.cpp` |
-| 任务 4 | 三种初始布局：随机撒点、连接强度聚类、二次方程解析（Eigen 稀疏 + BiCGSTAB） | `MyPlace/initial_placement.cpp` |
-| 任务 5 | ePlace 全局布局：对数-和（WA）可导线长 → 网格密度建模 + Filler → DCT 求解泊松方程得电场 → Nesterov 加速梯度下降 | `MyPlace/global_placement.cpp` |
-| 任务 6 | 双路可视化：CImg 输出 BMP、手写 GDSII 二进制流（KLayout 可直接打开） | `Plot/plot.cpp`、`Plot/gdsii.cpp` |
-| 任务 7 | Abacus 最小位移合法化：行结构 + 障碍区间 + 3 候选行试放 | `MyPlace/legalization.cpp` |
-| 附加 | Flask + 单页前端（数据 / 分析 / 结果三页），本地可视化运行 | `web/` |
+| 阶段   | 内容                                                                                          | 代码位置                             |
+| ---- | ------------------------------------------------------------------------------------------- | -------------------------------- |
+| 任务 3 | 解析 BookShelf 六件套（`.aux .scl .nodes .nets .pl .wts`），建立 Module / Pin / Net / SiteRow 数据结构并统计 | `MyPlace/myplace.cpp`            |
+| 任务 4 | 三种初始布局：随机撒点、连接强度聚类、二次方程解析（Eigen 稀疏 + BiCGSTAB）                                              | `MyPlace/initial_placement.cpp`  |
+| 任务 5 | ePlace 全局布局：对数-和（WA）可导线长 → 网格密度建模 + Filler → DCT 求解泊松方程得电场 → Nesterov 加速梯度下降                | `MyPlace/global_placement.cpp`   |
+| 任务 6 | 双路可视化：CImg 输出 BMP、手写 GDSII 二进制流（KLayout 可直接打开）                                              | `Plot/plot.cpp`、`Plot/gdsii.cpp` |
+| 任务 7 | Abacus 最小位移合法化：行结构 + 障碍区间 + 3 候选行试放                                                         | `MyPlace/legalization.cpp`       |
+| 附加   | Flask + 单页前端（数据 / 分析 / 结果三页），本地可视化运行                                                        | `web/`                           |
 
 ---
 
@@ -36,6 +36,7 @@ MyPlacement/
 ├── third_party/eigen3/         # 第三方：Eigen 线性代数库（已内置）
 ├── data/                       # 示例数据：thin1（玩具电路）/ adaptec1（21 万单元）
 ├── web/                        # Flask 后端 + 单页前端
+├── .vscode/                    # VS Code 配置：推荐扩展 / CMake / 构建任务 / 调试
 ├── MyPlacement综合设计报告.md    # 综合设计报告
 ├── gen_reports.py              # 由正文内容生成 Word 版报告（需学校模板）
 └── README.md                   # 本文件
@@ -49,25 +50,27 @@ MyPlacement/
 
 程序**只能在 Linux / WSL 下编译运行**：绘图依赖 CImg + X11，Windows 原生（MSVC）可以编译但会自动关闭绘图。内核本身是纯 C++14，另外两个第三方库已随仓库提供，离线可用。
 
-| 依赖 | 版本 / 说明 |
-| --- | --- |
-| 操作系统 | Linux x86_64，或 Windows 11 + WSL2（Ubuntu） |
-| 编译器 | g++，支持 C++14 |
-| 构建 | CMake ≥ 3.5（建议 3.16+）、Ninja 或 Make |
-| 系统库 | `libx11-dev`（CImg 需要） |
-| Web 前端 | Python 3 + Flask（仅使用网页时需装） |
+| 依赖     | 版本 / 说明                                  |
+| ------ | ---------------------------------------- |
+| 操作系统   | Linux x86_64，或 Windows 11 + WSL2（Ubuntu） |
+| 编译器    | g++，支持 C++14                             |
+| 构建     | CMake ≥ 3.5（建议 3.16+）、Ninja 或 Make       |
+| 系统库    | `libx11-dev`（CImg 需要）                    |
+| Web 前端 | Python 3 + Flask（仅使用网页时需装）               |
 
 Ubuntu / WSL 一次性安装：
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y build-essential cmake ninja-build g++ libx11-dev python3-pip
+sudo apt-get install -y build-essential cmake ninja-build gdb libx11-dev python3-pip
 pip3 install flask
 ```
 
 ---
 
 ## 四、快速开始
+
+> 不想敲命令？跳到 **[第五节：在 VS Code 中开发](#五在-vs-code-中开发图形化操作)**，三个按钮就能编译、运行、调试。
 
 ```bash
 # 1. 编译（在工程根目录；产物为 build/myplace）
@@ -99,18 +102,94 @@ wsl bash -lc "cd /mnt/d/ideazy/zs3 && cmake -S . -B build -G Ninja && cmake --bu
 
 ---
 
-## 五、命令行用法
+## 五、在 VS Code 中开发（图形化操作）
+
+仓库自带 `.vscode/` 配置（推荐扩展、CMake 构建目录、构建任务、三条调试配置），拉下来即可按键操作，不必先背命令。
+
+### 1. 装三个扩展
+
+左侧扩展面板（`Ctrl+Shift+X`），搜索并安装：
+
+| 扩展              | ID                            | 用途                      |
+| --------------- | ----------------------------- | ----------------------- |
+| **WSL**         | `ms-vscode-remote.remote-wsl` | 在 Windows 上连进 WSL 编译/运行 |
+| **C/C++**       | `ms-vscode.cpptools`          | 语法提示、断点调试               |
+| **CMake Tools** | `ms-vscode.cmake-tools`       | 底部状态栏的配置/构建/运行按钮        |
+
+> 打开工程时右下角会弹「此工作区推荐安装以下扩展」，点 **全部安装** 即可；用网页功能再加装 **Python**。
+
+### 2. 在 WSL 里打开工程（最关键的一步）
+
+1. 点左下角 **`><`** 图标（或 `Ctrl+Shift+P` 输入 `WSL: Connect to WSL`）；
+2. 等窗口左下角变成 **`WSL: Ubuntu`**；
+3. 菜单 **文件 → 打开文件夹**，输入 `/mnt/d/ideazy/zs3`（换成你实际克隆的位置）。
+
+也可以在 WSL 终端里 `cd` 到工程根后执行 `code .`，效果相同。
+
+> **不要用 Windows 本机直接打开**。`Plot/plot.h` 里 `#ifndef _WIN32` 会自动关掉 CImg，Windows 下编译能过但不出图片，Web 端也没有结果图。
+
+### 3. 首次配置
+
+打开后右下角弹「Would you like to configure this project?」→ 点 **Yes**；没弹就 `Ctrl+Shift+P` → `CMake: Configure`。
+
+第一次会让你选 **Kit**（编译器），选列表里带 `gcc` / `g++` 的那条，通常是 **`GCC 13.x.x x86_64-linux-gnu`**。选完底部状态栏会出现 `Build`、`▷`、`🐞` 三个按钮。
+
+### 4. 编译
+
+点状态栏的 **`Build`**（或按 `Ctrl+Shift+B` / `F7`）。等价于命令行 `cmake --build build`，产物就是 `build/myplace`，与终端构建共用同一目录，不会重复编译。
+
+### 5. 运行
+
+状态栏 **launch target**（显示为 `myplace` 或 `[All targets]`）点一下 → 选 **`myplace`** → 点 **`▷`**。
+它就是直接跑 `./build/myplace`，日志输出在下方面板 `TERMINAL`。
+
+想带参数，用 `Ctrl+Shift+P` → `Tasks: Run Task`，会看到：
+
+- 运行 `--fast`（默认 adaptec1）
+- 运行 thin1（秒级验证）
+- 启动 Web 前端（Ctrl+C 停止）
+
+### 6. 调试
+
+左侧 **运行和调试**（`Ctrl+Shift+D`），顶部下拉框三选一：
+
+| 配置                                    | 参数                      | 适合        |
+| ------------------------------------- | ----------------------- | --------- |
+| `myplace --fast（默认 adaptec1，约 36 秒）`  | `--fast`                | 日常调试      |
+| `myplace --fast data/thin1.aux（秒级验证）` | `--fast data/thin1.aux` | 改算法时反复跑   |
+| `myplace 完整流程（含三种初始布局对比）`             | 无                       | 要看初始布局对比表 |
+
+选好按 `F5`，断点可以直接下在 `MyPlace/global_placement.cpp` 的 Nesterov 主循环里。三条配置都带 `preLaunchTask`，会先自动编译再启动。
+
+### 7. 看 Web 效果
+
+`Ctrl+Shift+P` → `Tasks: Run Task` → **启动 Web 前端**，然后浏览器打开 <http://localhost:5000>。停止任务按终端里的 `Ctrl+C`。
+
+### 常见卡点
+
+| 现象                      | 处理                                                                                            |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
+| `No kit found`          | `Ctrl+Shift+P` → `CMake: Scan for Kits`；仍没有说明 WSL 里没装 g++（`sudo apt install build-essential`） |
+| 断点不生效、提示找不到 gdb         | `sudo apt install gdb`                                                                        |
+| 链接报 `cannot find -lX11` | `sudo apt install libx11-dev`                                                                 |
+| 左下角没有 `WSL: Ubuntu`     | 走的是 Windows 本机模式，重新「Connect to WSL」再打开文件夹                                                     |
+| 构建特别慢                   | 状态栏构建类型被切成了 Debug，点它切回 `Release`                                                              |
+| 改了 CMakeLists.txt 后行为异常 | `Ctrl+Shift+P` → `CMake: Delete Cache and Reconfigure`                                        |
+
+---
+
+## 六、命令行用法
 
 ```
 myplace [--fast] [--out <目录>] [输入文件.aux]
 ```
 
-| 参数 | 说明 |
-| --- | --- |
-| 不带参数 | 完整流程：解析 → 三种初始布局对比 → 全局布局 → 可视化 → 合法化 |
-| `--fast` | 跳过初始布局对比与算法自检，直接 随机布局 → 全局布局 → 可视化 → 合法化（更快） |
-| `--out <目录>` | 指定输出目录，默认 `output/`（Web 端为每个请求分配独立目录） |
-| 末尾参数 | 输入 `.aux` 路径，默认 `data/adaptec1.aux` |
+| 参数           | 说明                                           |
+| ------------ | -------------------------------------------- |
+| 不带参数         | 完整流程：解析 → 三种初始布局对比 → 全局布局 → 可视化 → 合法化        |
+| `--fast`     | 跳过初始布局对比与算法自检，直接 随机布局 → 全局布局 → 可视化 → 合法化（更快） |
+| `--out <目录>` | 指定输出目录，默认 `output/`（Web 端为每个请求分配独立目录）        |
+| 末尾参数         | 输入 `.aux` 路径，默认 `data/adaptec1.aux`          |
 
 - 参数顺序任意；**没有 `--quick` 这个参数**，传了会被当成文件路径。
 - 输入文件在工程内任意子目录启动都能找到：程序会自动向上查找 `data/<文件名>`（`ResolveDataFile`）。
@@ -128,7 +207,7 @@ output/
 
 ---
 
-## 六、Web 界面
+## 七、Web 界面
 
 三页式（`#/data` → `#/run` → `#/result`），顶部步骤条可点击跳转，单文件零外部依赖，断网可用。
 
@@ -145,38 +224,38 @@ output/
 
 ---
 
-## 七、数据格式
+## 八、数据格式
 
 BookShelf 格式，一套数据是 6 个同名文件：
 
-| 文件 | 作用 |
-| --- | --- |
-| `.aux` | 清单，只记录其余 5 个文件名 |
+| 文件       | 作用                     |
+| -------- | ---------------------- |
+| `.aux`   | 清单，只记录其余 5 个文件名        |
 | `.nodes` | 单元名称、尺寸、是否固定（terminal） |
-| `.nets` | 网络与引脚偏移 |
-| `.pl` | 初始坐标（`/FIXED` 表示锁定） |
-| `.scl` | 行定义（行数、行高、站点宽度） |
-| `.wts` | 网络权重（可为空，默认权重 1） |
+| `.nets`  | 网络与引脚偏移                |
+| `.pl`    | 初始坐标（`/FIXED` 表示锁定）    |
+| `.scl`   | 行定义（行数、行高、站点宽度）        |
+| `.wts`   | 网络权重（可为空，默认权重 1）       |
 
 内置数据集：
 
-| 数据集 | 规模 | 用途 |
-| --- | --- | --- |
-| `data/thin1.aux` | 3 个可移动单元 / 2 个网络 | 秒级功能验证 |
+| 数据集                 | 规模                                           | 用途                       |
+| ------------------- | -------------------------------------------- | ------------------------ |
+| `data/thin1.aux`    | 3 个可移动单元 / 2 个网络                             | 秒级功能验证                   |
 | `data/adaptec1.aux` | 210,904 单元 / 221,142 网络 / 944,053 引脚 / 890 行 | 性能与质量评估（`.nets` 约 35 MB） |
 
 ---
 
-## 八、性能参考
+## 九、性能参考
 
 Release 构建、单核、adaptec1（21 万单元）实测：
 
-| 场景 | 耗时 |
-| --- | --- |
-| `--fast` 全流程 | ≈ 36 秒 |
-| 完整流程（含三种初始布局对比） | ≈ 56 秒 |
+| 场景                         | 耗时     |
+| -------------------------- | ------ |
+| `--fast` 全流程               | ≈ 36 秒 |
+| 完整流程（含三种初始布局对比）            | ≈ 56 秒 |
 | 其中 Nesterov 全局布局（`--fast`） | ≈ 29 秒 |
-| 合法化 | ≈ 4 秒 |
+| 合法化                        | ≈ 4 秒  |
 
 典型结果（`--fast`）：HPWL 2.21476e9 → 8.35075e8，改善约 62%；密度溢出率 τ ≈ 2.8%；合法化后重叠对 0，HPWL 退化 < 0.1%。数值会随数据集与运行轮次略有差异，以程序日志为准。
 
@@ -184,26 +263,26 @@ Debug 构建慢 2~3 倍，也是 Web 端超时的历史原因；CMakeLists 已�
 
 ---
 
-## 九、常见问题
+## 十、常见问题
 
-| 现象 | 原因与处理 |
-| --- | --- |
-| `未找到 myplace 可执行文件` | 还没编译，按「快速开始」编译一次再启动 Web |
-| `分析超时` | 换「快速分析」；确认 `build/myplace` 是 Release 版（`cmake --fresh` 重配） |
-| `找不到 data/xxx` | 从工程根启动，或传 `.aux` 的完整路径 |
-| cmd 里双击 `myplace` 报"不是有效的 Win32 程序" | 它是 Linux ELF，只能在 WSL / Linux 下运行 |
-| 链接报 X11 相关错误 | 装 `libx11-dev`；Windows 原生编译会自动关闭绘图 |
-| 网页样式是旧的 | 浏览器缓存，Ctrl+F5 强刷 |
-| 5000 端口被占用 | `MYPLACE_PORT=5001 python3 server.py` |
-| 生成器不匹配（generator does not match） | `build/` 里是别的编译器的缓存，`cmake --fresh` 或删目录重配 |
+| 现象                                  | 原因与处理                                                      |
+| ----------------------------------- | ---------------------------------------------------------- |
+| `未找到 myplace 可执行文件`                 | 还没编译，按「快速开始」编译一次再启动 Web                                    |
+| `分析超时`                              | 换「快速分析」；确认 `build/myplace` 是 Release 版（`cmake --fresh` 重配） |
+| `找不到 data/xxx`                      | 从工程根启动，或传 `.aux` 的完整路径                                     |
+| cmd 里双击 `myplace` 报"不是有效的 Win32 程序" | 它是 Linux ELF，只能在 WSL / Linux 下运行                           |
+| 链接报 X11 相关错误                        | 装 `libx11-dev`；Windows 原生编译会自动关闭绘图                         |
+| 网页样式是旧的                             | 浏览器缓存，Ctrl+F5 强刷                                           |
+| 5000 端口被占用                          | `MYPLACE_PORT=5001 python3 server.py`                      |
+| 生成器不匹配（generator does not match）    | `build/` 里是别的编译器的缓存，`cmake --fresh` 或删目录重配                 |
 
 ---
 
-## 十、第三方组件
+## 十一、第三方组件
 
-| 组件 | 许可 | 用途 |
-| --- | --- | --- |
-| [Eigen](https://eigen.tuxfamily.org/) | MPL2 | 稀疏矩阵与 BiCGSTAB 迭代求解（任务 4） |
-| [CImg](https://cimg.eu/) | CeCILL-C | BMP 位图输出（任务 6） |
+| 组件                                    | 许可       | 用途                        |
+| ------------------------------------- | -------- | ------------------------- |
+| [Eigen](https://eigen.tuxfamily.org/) | MPL2     | 稀疏矩阵与 BiCGSTAB 迭代求解（任务 4） |
+| [CImg](https://cimg.eu/)              | CeCILL-C | BMP 位图输出（任务 6）            |
 
 两者均已内置在仓库内（`third_party/eigen3/`、`Library/CImg/`），无需额外下载。

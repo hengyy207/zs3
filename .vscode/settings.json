@@ -1,0 +1,29 @@
+{
+  // CMake 工程根与构建目录：与命令行 `cmake -S . -B build` 完全一致，
+  // 保证 VS Code 与终端共用同一份 build/，不会各编一套。
+  "cmake.sourceDirectory": "${workspaceFolder}",
+  "cmake.buildDirectory": "${workspaceFolder}/build",
+  "cmake.generator": "Ninja",
+
+  // 打开工程时自动配置一次，省掉手动 CMake: Configure
+  "cmake.configureOnOpen": true,
+
+  // 强制 Release：Debug 版全局布局慢 2~3 倍，是 Web 端超时的常见原因
+  "cmake.configureSettings": {
+    "CMAKE_BUILD_TYPE": "Release"
+  },
+
+  // 程序用相对路径读 data/、写 output/，终端默认落在工程根最省心
+  "terminal.integrated.cwd": "${workspaceFolder}",
+
+  // 让 C/C++ 扩展按 CMake 实际编译参数推断头文件与宏，
+  // 否则 Eigen / CImg 会被误报红波浪线（编译其实是过的）
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+  "C_Cpp.default.compileCommands": "${workspaceFolder}/build/compile_commands.json",
+
+  // CImg 是 2.9 MB 的单头文件，关掉超大文件提示
+  "files.associations": {
+    "*.h": "cpp",
+    "CImg.h": "cpp"
+  }
+}

@@ -1,0 +1,58 @@
+{
+  // F5 前会自动执行 tasks.json 里的「构建 myplace」任务
+  // 注意：必须在 WSL / Linux 环境打开工程（左下角 >< 连接 WSL），Windows 原生调试无法运行 Linux 可执行文件
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "myplace --fast（默认 adaptec1，约 36 秒）",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/myplace",
+      "args": ["--fast"],
+      "cwd": "${workspaceFolder}",
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "为 gdb 启用整齐打印",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "构建 myplace"
+    },
+    {
+      "name": "myplace --fast data/thin1.aux（秒级验证）",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/myplace",
+      "args": ["--fast", "data/thin1.aux"],
+      "cwd": "${workspaceFolder}",
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "为 gdb 启用整齐打印",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "构建 myplace"
+    },
+    {
+      "name": "myplace 完整流程（含三种初始布局对比）",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/myplace",
+      "args": [],
+      "cwd": "${workspaceFolder}",
+      "MIMode": "gdb",
+      "setupCommands": [
+        {
+          "description": "为 gdb 启用整齐打印",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ],
+      "preLaunchTask": "构建 myplace"
+    }
+  ]
+}
