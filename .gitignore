@@ -1,0 +1,80 @@
+# ============================================================
+# MyPlacement — Git 忽略规则
+# 目标：仓库里只保留「源码 + 数据 + 文档」，构建产物与运行结果一律不入库。
+# ============================================================
+
+# ---------- 1. CMake / 编译产物 ----------
+# 构建目录（命令行 -B build、VS 的 out/build 都在此列）
+build/
+out/
+cmake-build-*/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+compile_commands.json
+.ninja_deps
+.ninja_log
+Makefile
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.pdb
+*.ilk
+
+# ---------- 2. 程序运行输出 ----------
+# myplace 默认写 output/ 下的位图与版图；Web 端按请求写临时目录
+output/
+*.bmp
+*.gds
+*.log
+
+# ---------- 3. IDE / 编辑器 ----------
+# VS 的 .vs/ 里是 100 MB 级别的 IntelliSense 数据库，绝对不能入库
+.vs/
+.vscode/
+.idea/
+*.sln
+*.slnx
+*.vcxproj
+*.vcxproj.*
+*.user
+*.suo
+*.opensdf
+*.sdf
+*.aps
+
+# ---------- 4. Python ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# ---------- 5. 本地工具与临时文件 ----------
+# 本仓库内的验证/截图产物目录
+.verify/
+# AI 助手的工作记忆，属于本机状态，不属于项目成果
+.workbuddy/
+*.tmp
+*.bak
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+nohup.out
+
+# ---------- 6. 按需排除的大文件 ----------
+# 任务描述.pdf 是课程下发的需求书，公开到 GitHub 可能涉及版权/课程要求，
+# 默认不入库；需要随压缩包一起发给同学时，手动拷贝即可。
+任务描述.pdf
+# adaptec1 数据集约 41 MB（.nets 单个 35 MB）。仍在校验范围内，但仓库会明显变重；
+# 若想让 clone 更快，取消下面一行的注释并改用 thin1 做演示。
+# data/adaptec1.*
